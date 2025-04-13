@@ -1,0 +1,12 @@
+<div class="app-container">
+    <div class="component-box">
+      <app-form-builder (formBuilt)="onFormBuilt($event)"></app-form-builder>
+    </div>
+  
+    <hr />
+  
+    <div class="component-box" *ngIf="formFields.length">
+      <app-dynamic-form [fields]="formFields"></app-dynamic-form>
+    </div>
+  </div>
+  

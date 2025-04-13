@@ -1,0 +1,47 @@
+<div class="dynamic-form-container">
+    <h2>Preview & Submit Form</h2>
+    <form [formGroup]="form" (ngSubmit)="submitForm()">
+      <div *ngFor="let field of fields; let i = index" class="dynamic-form-field">
+        <label>{{ field.label }}</label>
+  
+        <input
+          *ngIf="field.type === 'text'"
+          [placeholder]="field.placeholder"
+          [formControlName]="'field_' + i"
+          type="text"
+        />
+  
+        <textarea
+          *ngIf="field.type === 'textarea'"
+          [placeholder]="field.placeholder"
+          [formControlName]="'field_' + i"
+        ></textarea>
+  
+        <select *ngIf="field.type === 'dropdown'" [formControlName]="'field_' + i">
+          <option *ngFor="let opt of field.options" [value]="opt.value">{{ opt.label }}</option>
+        </select>
+  
+        <input *ngIf="field.type === 'checkbox'" type="checkbox" [formControlName]="'field_' + i" />
+  
+        <div *ngIf="field.type === 'radio'">
+          <label *ngFor="let opt of field.options">
+            <input
+              type="radio"
+              [value]="opt.value"
+              [formControlName]="'field_' + i"
+              name="'field_' + i"
+            />
+            {{ opt.label }}
+          </label>
+        </div>
+  
+        <div *ngIf="submitted && getControl(i)?.invalid" class="error-message">
+          This field is required
+        </div>
+        <br />
+      </div>
+  
+      <button type="submit">Submit</button>
+    </form>
+  </div>
+  

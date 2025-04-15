@@ -1,42 +1,64 @@
-import { Component, Input } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { FormField } from 'src/app/models/form-field.model';
+import { Component } from '@angular/core';
 
 @Component({
   selector: 'app-dynamic-form',
   templateUrl: './dynamic-form.component.html',
+  styleUrls: ['./dynamic-form.component.css'],
 })
-export class DynamicFormComponent {
-  @Input() fields: FormField[] = [];
-  form!: FormGroup;
-  submitted = false;
+export class DynamicFormBuilderComponent {
+  selectedFieldType: string = 'text';
+  fieldLabel: string = '';
+  fieldOptions: string = '';
 
-  constructor(private fb: FormBuilder) {}
+  fields: any[] = [];
+  formFields: any[] = [];
+  formBuilt: boolean = false;
+  formSubmitted: boolean = false;
 
-  ngOnChanges() {
-    this.createForm();
-  }
+  addField() {
+    if (!this.fieldLabel) return;
 
-  createForm() {
-    const group: any = {};
-    this.fields.forEach((field, index) => {
-      const validators = field.required ? [Validators.required] : [];
-      group['field_' + index] = ['', validators];
+    const needsOptions = ['radio', 'checkbox', 'dropdown'].includes(
+      this.selectedFieldType
+    );
+
+    const optionsArray = needsOptions
+      ? this.fieldOptions
+          .split(',')
+          .map((opt) => opt.trim())
+          .filter((opt) => opt)
+      : [];
+
+    this.fields.push({
+      label: this.fieldLabel,
+      type: this.selectedFieldType,
+      options: optionsArray,
+      value: this.selectedFieldType === 'checkbox' ? {} : '',
     });
-    this.form = this.fb.group(group);
+
+    this.resetInputs();
   }
 
-  submitForm() {
-    this.submitted = true;
-    if (this.form.valid) {
-      console.log('Form Submitted ✅', this.form.value);
-      alert('Form submitted successfully!');
-    } else {
-      console.warn('Form has errors ❌');
-    }
+  buildForm() {
+    this.formFields = this.fields.map((field) => ({
+      ...field,
+      value: field.type === 'checkbox' ? {} : '',
+    }));
+    this.formBuilt = true;
+    this.formSubmitted = false;
   }
 
-  getControl(index: number) {
-    return this.form.get('field_' + index);
+  resetInputs() {
+    this.fieldLabel = '';
+    this.fieldOptions = '';
+  }
+
+  removeField(index: number) {
+    this.fields.splice(index, 1);
+  }
+
+  onSubmit() {
+    this.formSubmitted = true;
+    console.log('Form Submitted Data:', this.formFields);
   }
 }

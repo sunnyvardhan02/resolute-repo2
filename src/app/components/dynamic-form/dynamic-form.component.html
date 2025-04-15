@@ -1,47 +1,107 @@
-<div class="dynamic-form-container">
-    <h2>Preview & Submit Form</h2>
-    <form [formGroup]="form" (ngSubmit)="submitForm()">
-      <div *ngFor="let field of fields; let i = index" class="dynamic-form-field">
+<div class="container">
+  <!-- Left Card: Form Builder -->
+  <div class="card left-card">
+    <h2>Form Field Builder</h2>
+
+    <!-- Field Type Selector -->
+    <div class="form-group">
+      <label for="fieldType">Field Type:</label>
+      <select id="fieldType" [(ngModel)]="selectedFieldType">
+        <option value="text">Text</option>
+        <option value="textarea">Textarea</option>
+        <option value="dropdown">Dropdown</option>
+        <option value="radio">Radio Buttons</option>
+        <option value="checkbox">Checkboxes</option>
+      </select>
+    </div>
+
+    <!-- Field Label Input -->
+    <div class="form-group">
+      <label for="fieldLabel">Label:</label>
+      <input id="fieldLabel" type="text" [(ngModel)]="fieldLabel" placeholder="Enter field label" />
+    </div>
+
+    <!-- Field Options (only for dropdown, radio, checkbox) -->
+    <div class="form-group" *ngIf="selectedFieldType === 'radio' || selectedFieldType === 'checkbox' || selectedFieldType === 'dropdown'">
+      <label for="fieldOptions">Options (comma separated):</label>
+      <input id="fieldOptions" type="text" [(ngModel)]="fieldOptions" placeholder="Option1, Option2, ..." />
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="button-group">
+      <button class="btn-add" (click)="addField()">Add Field</button>
+      <button class="btn-build" (click)="buildForm()">Build Form</button>
+    </div>
+
+    <!-- List of Added Fields -->
+    <div *ngIf="fields.length > 0" class="field-list">
+      <h4>Added Fields</h4>
+      <ul>
+        <li *ngFor="let field of fields; let i = index">
+          {{ field.label }} ({{ field.type }})
+          <button class="btn-remove" (click)="removeField(i)">Remove</button>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Right Card: Form Preview -->
+  <div class="card right-card" *ngIf="formBuilt">
+    <h2>Form Preview</h2>
+
+    <form (ngSubmit)="onSubmit()" #formRef="ngForm">
+      <div *ngFor="let field of formFields" class="form-field">
         <label>{{ field.label }}</label>
-  
-        <input
-          *ngIf="field.type === 'text'"
-          [placeholder]="field.placeholder"
-          [formControlName]="'field_' + i"
-          type="text"
-        />
-  
-        <textarea
-          *ngIf="field.type === 'textarea'"
-          [placeholder]="field.placeholder"
-          [formControlName]="'field_' + i"
-        ></textarea>
-  
-        <select *ngIf="field.type === 'dropdown'" [formControlName]="'field_' + i">
-          <option *ngFor="let opt of field.options" [value]="opt.value">{{ opt.label }}</option>
+
+        <!-- Text Input -->
+        <input *ngIf="field.type === 'text'"
+               type="text"
+               [(ngModel)]="field.value"
+               name="{{field.label}}"
+               required />
+
+        <!-- Textarea -->
+        <textarea *ngIf="field.type === 'textarea'"
+                  [(ngModel)]="field.value"
+                  name="{{field.label}}"
+                  required></textarea>
+
+        <!-- Dropdown -->
+        <select *ngIf="field.type === 'dropdown'"
+                [(ngModel)]="field.value"
+                name="{{field.label}}"
+                required>
+          <option *ngFor="let opt of field.options" [value]="opt">{{ opt }}</option>
         </select>
-  
-        <input *ngIf="field.type === 'checkbox'" type="checkbox" [formControlName]="'field_' + i" />
-  
-        <div *ngIf="field.type === 'radio'">
+
+        <!-- Radio Buttons -->
+        <div *ngIf="field.type === 'radio'" class="radio-group">
           <label *ngFor="let opt of field.options">
-            <input
-              type="radio"
-              [value]="opt.value"
-              [formControlName]="'field_' + i"
-              name="'field_' + i"
-            />
-            {{ opt.label }}
+            <input type="radio"
+                   [name]="field.label"
+                   [value]="opt"
+                   [(ngModel)]="field.value"
+                   required />
+            {{ opt }}
           </label>
         </div>
-  
-        <div *ngIf="submitted && getControl(i)?.invalid" class="error-message">
-          This field is required
+
+        <!-- Checkboxes -->
+        <div *ngIf="field.type === 'checkbox'" class="checkbox-group">
+          <label *ngFor="let opt of field.options">
+            <input type="checkbox"
+                   [(ngModel)]="field.value[opt]"
+                   name="{{field.label}}_{{opt}}" />
+            {{ opt }}
+          </label>
         </div>
-        <br />
       </div>
-  
-      <button type="submit">Submit</button>
+
+      <button type="submit" class="btn-submit">Submit</button>
     </form>
+
+    <div *ngIf="formSubmitted" class="success-message">
+      ✅ Form submitted successfully!
+    </div>
   </div>
-  
+</div>

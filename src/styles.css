@@ -11,7 +11,7 @@
   background-color: #ffffff;
   border: 1px solid #ddd;
   border-radius: 10px;
-  box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
 }
 
 .left-card {
@@ -26,7 +26,6 @@
   margin-bottom: 15px;
 }
 
-/* General styling for form inputs */
 input:not([type="checkbox"]):not([type="radio"]),
 select,
 textarea {
@@ -37,7 +36,6 @@ textarea {
   border: 1px solid #ccc;
 }
 
-/* Optional: Additional styling for checkbox and radio labels */
 input[type="checkbox"],
 input[type="radio"] {
   margin-right: 8px;
@@ -47,7 +45,15 @@ textarea {
   resize: vertical;
 }
 
-.btn-add, .btn-build, .btn-submit {
+.error {
+  color: red;
+  font-size: 13px;
+  margin-top: 4px;
+}
+
+.btn-add,
+.btn-build,
+.btn-submit {
   margin-top: 10px;
   margin-right: 10px;
   padding: 8px 16px;
@@ -56,10 +62,18 @@ textarea {
   border: none;
   border-radius: 6px;
   cursor: pointer;
+  transition: background-color 0.2s;
 }
 
-.btn-add:hover, .btn-build:hover, .btn-submit:hover {
+.btn-add:hover,
+.btn-build:hover,
+.btn-submit:hover {
   background-color: #155b94;
+}
+
+.btn-submit:disabled {
+  background-color: #a0a0a0;
+  cursor: not-allowed;
 }
 
 .field-list ul {
@@ -85,17 +99,19 @@ textarea {
   padding: 2px 10px;
   border-radius: 5px;
   cursor: pointer;
+  transition: background-color 0.2s;
 }
 
 .btn-remove:hover {
   background-color: #c0392b;
 }
 
-.radio-group, .checkbox-group {
+.radio-group,
+.checkbox-group {
   display: flex;
-  flex-direction: row;
-  gap: 5px;
-  margin-top: 5px;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 6px;
 }
 
 .success-message {

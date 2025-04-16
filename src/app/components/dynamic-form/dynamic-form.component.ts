@@ -1,64 +1,111 @@
 import { Component } from '@angular/core';
+import {
+  FormBuilder,
+  FormGroup,
+  FormControl,
+  Validators,
+} from '@angular/forms';
+
+interface Field {
+  label: string;
+  type: string;
+  placeholder?: string;
+  options?: string[];
+  required: boolean;
+}
 
 @Component({
   selector: 'app-dynamic-form',
   templateUrl: './dynamic-form.component.html',
   styleUrls: ['./dynamic-form.component.css'],
 })
-export class DynamicFormBuilderComponent {
-  selectedFieldType: string = 'text';
-  fieldLabel: string = '';
-  fieldOptions: string = '';
+export class DynamicFormComponent {
+  selectedFieldType = 'text';
+  fieldLabel = '';
+  fieldPlaceholder = '';
+  fieldOptions = '';
+  isFieldRequired = false;
+  errorMessage = '';
 
-  fields: any[] = [];
-  formFields: any[] = [];
-  formBuilt: boolean = false;
-  formSubmitted: boolean = false;
+  fields: Field[] = [];
+  formFields: Field[] = [];
+  formBuilt = false;
+  formSubmitted = false;
+
+  form: FormGroup = this.fb.group({});
+
+  constructor(private fb: FormBuilder) {}
 
   addField() {
-    if (!this.fieldLabel) return;
+    if (!this.fieldLabel.trim()) {
+      this.errorMessage = 'Label is required.';
+      return;
+    }
 
-    const needsOptions = ['radio', 'checkbox', 'dropdown'].includes(
-      this.selectedFieldType
-    );
+    if (
+      (this.selectedFieldType === 'radio' ||
+        this.selectedFieldType === 'checkbox' ||
+        this.selectedFieldType === 'dropdown') &&
+      !this.fieldOptions.trim()
+    ) {
+      this.errorMessage = 'Options are required for this field type.';
+      return;
+    }
 
-    const optionsArray = needsOptions
-      ? this.fieldOptions
-          .split(',')
-          .map((opt) => opt.trim())
-          .filter((opt) => opt)
-      : [];
-
-    this.fields.push({
-      label: this.fieldLabel,
+    const newField: Field = {
+      label: this.fieldLabel.trim(),
       type: this.selectedFieldType,
-      options: optionsArray,
-      value: this.selectedFieldType === 'checkbox' ? {} : '',
-    });
+      placeholder: this.fieldPlaceholder?.trim(),
+      required: this.isFieldRequired,
+      options:
+        this.selectedFieldType === 'radio' ||
+        this.selectedFieldType === 'checkbox' ||
+        this.selectedFieldType === 'dropdown'
+          ? this.fieldOptions.split(',').map((opt) => opt.trim())
+          : [],
+    };
 
+    this.fields.push(newField);
+    this.errorMessage = '';
     this.resetInputs();
-  }
-
-  buildForm() {
-    this.formFields = this.fields.map((field) => ({
-      ...field,
-      value: field.type === 'checkbox' ? {} : '',
-    }));
-    this.formBuilt = true;
-    this.formSubmitted = false;
-  }
-
-  resetInputs() {
-    this.fieldLabel = '';
-    this.fieldOptions = '';
   }
 
   removeField(index: number) {
     this.fields.splice(index, 1);
   }
 
+  resetInputs() {
+    this.fieldLabel = '';
+    this.fieldPlaceholder = '';
+    this.fieldOptions = '';
+    this.isFieldRequired = false;
+  }
+
+  buildForm() {
+    this.form = this.fb.group({});
+    this.formFields = [...this.fields];
+
+    for (const field of this.formFields) {
+      if (field.type === 'checkbox') {
+        const group = this.fb.group({});
+        field.options?.forEach((opt) => {
+          group.addControl(opt, new FormControl(false));
+        });
+        this.form.addControl(field.label, group);
+      } else {
+        const validators = field.required ? [Validators.required] : [];
+        this.form.addControl(field.label, new FormControl('', validators));
+      }
+    }
+
+    this.formBuilt = true;
+    this.formSubmitted = false;
+  }
+
   onSubmit() {
+    if (this.form.invalid) return;
+
     this.formSubmitted = true;
-    console.log('Form Submitted Data:', this.formFields);
+    console.log('Form submitted:', this.form.value);
   }
 }
